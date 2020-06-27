@@ -1,9 +1,7 @@
 ﻿using FileTreeMap.SubdivisionStrategies;
+using FileTreeMap.SubdivisionStrategies.SquarifiedSubdivision;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
-using System.Security.Cryptography;
-using System.Text;
 using System.Windows;
 
 namespace FileTreeMap
@@ -90,7 +88,7 @@ namespace FileTreeMap
 
     }
 
-    public delegate IEnumerable<Rect> RectangleRowLayout(IEnumerable<double> rectangleAreas);
+    
 
     public class Test
     {

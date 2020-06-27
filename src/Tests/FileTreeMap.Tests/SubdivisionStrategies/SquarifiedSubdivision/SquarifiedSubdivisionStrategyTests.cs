@@ -1,4 +1,5 @@
 using FileTreeMap.SubdivisionStrategies;
+using FileTreeMap.SubdivisionStrategies.SquarifiedSubdivision;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -7,7 +8,7 @@ using System.Windows;
 using System.Windows.Media;
 using Xunit;
 
-namespace FileTreeMap.Tests
+namespace FileTreeMap.Tests.SubdivisionStrategies.SquarifiedSubdivision
 {
     public class SquarifiedSubdivisionStrategyTests
     {
@@ -69,7 +70,7 @@ namespace FileTreeMap.Tests
         public void Subdivide_ValidInput_RectanglesDoNotOverlap()
         {
             GivenSquarifiedSubdivisionStrategy();
-            WhenSubdivideInvoked();
+            WhenSubdivideInvoked(); DrawDebugImage();
             ThenRectanglesDoNotOverlap();
         }
 
@@ -166,6 +167,11 @@ namespace FileTreeMap.Tests
         }
 
         #endregion
+
+        private void DrawDebugImage()
+        {
+            DrawDebugImage(parentRectangle, result!);
+        }
 
         private void DrawDebugImage(Rect parentRectangle, IEnumerable<Rect> rectangles)
         {
