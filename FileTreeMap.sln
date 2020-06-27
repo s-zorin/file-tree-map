@@ -3,13 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoApp", "src\DemoApp\DemoApp.csproj", "{5EA08345-B9C1-440C-B8B9-32EE8F4391AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoApp", "src\DemoApp\DemoApp.csproj", "{5EA08345-B9C1-440C-B8B9-32EE8F4391AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileTreeMap", "src\FileTreeMap\FileTreeMap.csproj", "{9916C33E-992F-4B1D-8E9E-2EFA8FA5CF08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileTreeMap", "src\FileTreeMap\FileTreeMap.csproj", "{9916C33E-992F-4B1D-8E9E-2EFA8FA5CF08}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{14D8FC96-D095-4975-A28C-9E993C70A39B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileTreeMap.Tests", "src\Tests\FileTreeMap.Tests\FileTreeMap.Tests.csproj", "{63BDF4C8-745D-4D24-81CE-0B3856AE9AA4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileTreeMap.Tests", "src\Tests\FileTreeMap.Tests\FileTreeMap.Tests.csproj", "{63BDF4C8-745D-4D24-81CE-0B3856AE9AA4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{50BE9FFB-6258-436F-9F1E-8FB105CB2FDC}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
