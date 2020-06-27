@@ -53,7 +53,7 @@ namespace FileTreeMap.SubdivisionStrategies.SquarifiedSubdivision
         private SubdivideResult SubdivideInternal(Rect rectangle, IEnumerable<double> rectangleAreas, RectangleRowLayoutStrategy rowLayoutStrategy)
         {
             var takeAmount = 1;
-            var previousMaxRectangleAspectRatio = double.MaxValue;
+            var maxAspectRatio = double.MaxValue;
             var row = Enumerable.Empty<Rect>();
 
             while (true)
@@ -67,11 +67,10 @@ namespace FileTreeMap.SubdivisionStrategies.SquarifiedSubdivision
                 }
 
                 var candidateRow = rowLayoutStrategy(rectangle, rectangleAreas.Take(takeAmount));
-                var newMaxRectangleAspectRatio = MaxRectangleAspectRatioInRow(candidateRow);
-                var maxRectangleAspectRatioIncreased = newMaxRectangleAspectRatio > previousMaxRectangleAspectRatio;
-                previousMaxRectangleAspectRatio = newMaxRectangleAspectRatio;
-
-                if (maxRectangleAspectRatioIncreased)
+                var candidateRowMaxAspectRatio = MaxRectangleAspectRatioInRow(candidateRow);
+                var isMaxAspectRatioIncreased = candidateRowMaxAspectRatio > maxAspectRatio;
+                
+                if (isMaxAspectRatioIncreased)
                 {
                     var remainingRectangle = CutRowFromRectangle(rectangle, row);
                     return new SubdivideResult(remainingRectangle, row, false);
@@ -81,6 +80,7 @@ namespace FileTreeMap.SubdivisionStrategies.SquarifiedSubdivision
                     takeAmount++;
                 }
 
+                maxAspectRatio = candidateRowMaxAspectRatio;
                 row = candidateRow;
             }
         }
