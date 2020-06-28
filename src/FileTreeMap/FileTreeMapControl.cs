@@ -1,48 +1,55 @@
 ﻿using FileTreeMap.SubdivisionStrategies.SquarifiedSubdivision;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace FileTreeMap
 {
-    public class CustomControl1 : Control
+    public class FileTreeMapControl : Control
     {
+        private const string VISUAL_BRUSH_PART = "VisualBrush";
+        private const string VISUAL_HOST_PART = "VisualHost";
+        private const string BUSY_INDICATOR_PART = "BusyIndicator";
+
         private readonly FileTreeFactory fileTreeFactory;
         private readonly FileTreeMapFactory fileTreeMapFactory;
         private readonly SquarifiedSubdivisionStrategy subdivisionStrategy;
         private CancellationTokenSource visualUpdateCancellationTokenSource;
         private CancellationTokenSource fullUpdateCancellationTokenSource;
 
-        FileTree? fileTree;
-        FileTreeMap? fileTreeMap;
-        VisualBrush? visualBrush;
-        Rectangle? visualHost;
-        UIElement? busyIndicator;
-        FileSystemWatcher? watcher;
+        private FileTree? fileTree;
+        private FileTreeMap? fileTreeMap;
+        private VisualBrush? visualBrush;
+        private Rectangle? visualHost;
+        private UIElement? busyIndicator;
+        private FileSystemWatcher? watcher;
 
         int busyCount = 0;
 
-        static CustomControl1()
+        public static readonly DependencyProperty DirectoryPathProperty = DependencyProperty.Register(
+            nameof(DirectoryPath),
+            typeof(string),
+            typeof(FileTreeMapControl),
+            new PropertyMetadata(null, OnDirectoryPathChanged));
+
+        public string? DirectoryPath
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(CustomControl1), new FrameworkPropertyMetadata(typeof(CustomControl1)));
+            get => (string?)GetValue(DirectoryPathProperty);
+            set => SetValue(DirectoryPathProperty, value);
         }
 
-        public CustomControl1()
+        static FileTreeMapControl()
+        {
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(FileTreeMapControl), new FrameworkPropertyMetadata(typeof(FileTreeMapControl)));
+        }
+
+        public FileTreeMapControl()
         {
             fileTreeFactory = new FileTreeFactory();
             fileTreeMapFactory = new FileTreeMapFactory();
@@ -52,8 +59,8 @@ namespace FileTreeMap
 
             SizeChanged += OnSizeChanged;
             MouseDoubleClick += OnDoubleClick;
-            Unloaded += OnUnloaded;
             Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
@@ -65,19 +72,19 @@ namespace FileTreeMap
             watcher.Renamed += OnFileChanged;
         }
 
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            watcher?.Dispose();
+        }
+
         private async void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            // TODO : Можно пропатчить существующее дерево новыми изменениями и перерисовать экран/
+            // Можно пропатчить существующее дерево новыми изменениями и перерисовать экран.
             // Жаль, что у меня нет на это времени, поэтому будет полный апдейт.
             await Dispatcher.InvokeAsync(async () =>
             {
                 await FullUpdateAsync();
             });
-        }
-
-        private void OnUnloaded(object sender, RoutedEventArgs e)
-        {
-            watcher?.Dispose();
         }
 
         private void OnDoubleClick(object sender, MouseButtonEventArgs args)
@@ -105,18 +112,9 @@ namespace FileTreeMap
             await VisualUpdateAsync();
         }
 
-        public string? DirectoryPath
-        {
-            get { return (string?)GetValue(DirectoryPathProperty); }
-            set { SetValue(DirectoryPathProperty, value); }
-        }
-
-        public static readonly DependencyProperty DirectoryPathProperty =
-            DependencyProperty.Register("DirectoryPath", typeof(string), typeof(CustomControl1), new PropertyMetadata(null, OnDirectoryPathChanged));
-
         private static async void OnDirectoryPathChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs args)
         {
-            if (dependencyObject is CustomControl1 control)
+            if (dependencyObject is FileTreeMapControl control)
             {
                 await control.FullUpdateAsync();
                 control.SetupFileSystemWatcher();
@@ -146,9 +144,9 @@ namespace FileTreeMap
         {
             base.OnApplyTemplate();
 
-            visualBrush = GetTemplateChild("VisualBrush") as VisualBrush;
-            visualHost = GetTemplateChild("VisualHost") as Rectangle;
-            busyIndicator = GetTemplateChild("BusyIndicator") as UIElement;
+            visualBrush = GetTemplateChild(VISUAL_BRUSH_PART) as VisualBrush;
+            visualHost = GetTemplateChild(VISUAL_HOST_PART) as Rectangle;
+            busyIndicator = GetTemplateChild(BUSY_INDICATOR_PART) as UIElement;
 
             await FullUpdateAsync();
         }

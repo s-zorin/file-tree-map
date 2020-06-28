@@ -20,6 +20,6 @@
         <TextBox Margin="4" x:Name="PathTextBox" VerticalContentAlignment="Center" />
         <Button Grid.Column="1" Padding="4" Content="Up" Margin="0,4,4,4" Click="Button_Click" />
 
-        <filetreemap:CustomControl1 Grid.Row="1" Grid.ColumnSpan="2" x:Name="CC" DirectoryPath="{Binding Text, ElementName=PathTextBox, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+        <filetreemap:FileTreeMapControl Grid.Row="1" Grid.ColumnSpan="2" x:Name="CC" DirectoryPath="{Binding Text, ElementName=PathTextBox, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
     </Grid>
 </Window>
