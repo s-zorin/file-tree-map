@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FileTreeMap\FileTreeMap.csproj" />
+    <ProjectReference Include="..\DemoControls\DemoControls.csproj" />
   </ItemGroup>
 
 </Project>

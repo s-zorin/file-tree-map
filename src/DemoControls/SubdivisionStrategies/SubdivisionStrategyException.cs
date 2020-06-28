@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace FileTreeMap.SubdivisionStrategies
+namespace DemoControls.SubdivisionStrategies
 {
     [Serializable]
     public class SubdivisionStrategyException : Exception

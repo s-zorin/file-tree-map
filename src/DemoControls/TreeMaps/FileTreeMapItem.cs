@@ -1,4 +1,6 @@
-﻿namespace FileTreeMap
+﻿using DemoControls.Trees;
+
+namespace DemoControls.TreeMaps
 {
     public class FileTreeMapItem : ITreeMapItem<FileTreeItem>
     {

@@ -1,9 +1,8 @@
-﻿using System;
+﻿using DemoControls.Trees;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace FileTreeMap
+namespace DemoControls.TreeMaps
 {
     public class FileTreeMap : ITreeMap<FileTreeItem>
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FileTreeMap
+namespace DemoControls.Trees
 {
     public class FileTree : ITree<FileTreeItem>
     {

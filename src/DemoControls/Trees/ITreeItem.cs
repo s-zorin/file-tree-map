@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace FileTreeMap
+namespace DemoControls.Trees
 {
     public interface ITreeItem<T> where T : ITreeItem<T>
     {

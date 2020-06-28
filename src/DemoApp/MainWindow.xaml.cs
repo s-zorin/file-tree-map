@@ -1,6 +1,4 @@
-﻿using FileTreeMap;
-using FileTreeMap.SubdivisionStrategies.SquarifiedSubdivision;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -160,56 +158,56 @@ namespace DemoApp
         }
     }
 
-    public class FileTreeFactory
-    {
-        private readonly Queue<FileTreeItem> queue;
 
-        public FileTreeFactory()
-        {
-            queue = new Queue<FileTreeItem>();
-        }
+    //public class FileTreeFactory
+    //{
+    //    private readonly Queue<FileTreeItem> queue;
 
-        public FileTree Create(DirectoryInfo root)
-        {
-            var item = CreateItem(root);
+    //    public FileTreeFactory()
+    //    {
+    //        queue = new Queue<FileTreeItem>();
+    //    }
 
-            queue.Enqueue(item);
+    //    public FileTree Create(DirectoryInfo root)
+    //    {
+    //        var item = CreateItem(root);
 
-            while (queue.TryDequeue(out var queuedItem))
-            {
-                if (queuedItem.Info is DirectoryInfo directoryInfo)
-                {
-                    foreach (var subInfo in directoryInfo.EnumerateFileSystemInfos())
-                    {
-                        var subItem = CreateItem(subInfo);
-                        queue.Enqueue(subItem);
-                        queuedItem.Items.Add(subItem);
+    //        queue.Enqueue(item);
 
-                        if (subInfo is FileInfo fileInfo)
-                        {
-                            queuedItem.Size += fileInfo.Length;
-                        }
-                    }
-                }
-            }
+    //        while (queue.TryDequeue(out var queuedItem))
+    //        {
+    //            if (queuedItem.Info is DirectoryInfo directoryInfo)
+    //            {
+    //                foreach (var subInfo in directoryInfo.EnumerateFileSystemInfos())
+    //                {
+    //                    var subItem = CreateItem(subInfo);
+    //                    queue.Enqueue(subItem);
+    //                    queuedItem.Items.Add(subItem);
 
-            return new FileTree
-            {
-                Root = item
-            };
-        }
+    //                    if (subInfo is FileInfo fileInfo)
+    //                    {
+    //                        queuedItem.Size += fileInfo.Length;
+    //                    }
+    //                }
+    //            }
+    //        }
 
-        private FileTreeItem CreateItem(FileSystemInfo info)
-        {
-            return new FileTreeItem
-            {
-                Title = info.Name, // TODO : Read from info?
-                Info = info,
-                Size = info is FileInfo f ? f.Length : 0
-            };
-        }
-    }
+    //        return new FileTree
+    //        {
+    //            Root = item
+    //        };
+    //    }
 
+    //    private FileTreeItem CreateItem(FileSystemInfo info)
+    //    {
+    //        return new FileTreeItem
+    //        {
+    //            Title = info.Name, // TODO : Read from info?
+    //            Info = info,
+    //            Size = info is FileInfo f ? f.Length : 0
+    //        };
+    //    }
+    //}
 
 
 }

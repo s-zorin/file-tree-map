@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace FileTreeMap
+namespace DemoControls.Trees
 {
     public class FileTreeItem : ITreeItem<FileTreeItem>
     {

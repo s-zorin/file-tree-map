@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Media;
 
-namespace FileTreeMap
+namespace DemoControls.TreeMaps
 {
     public class TreeMapRectangleDescription
     {

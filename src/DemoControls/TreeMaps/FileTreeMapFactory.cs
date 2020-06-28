@@ -1,4 +1,5 @@
-﻿using FileTreeMap.SubdivisionStrategies;
+﻿using DemoControls.SubdivisionStrategies;
+using DemoControls.Trees;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 
-namespace FileTreeMap
+namespace DemoControls.TreeMaps
 {
     public class FileTreeMapFactory : ITreeMapFactory<FileTreeItem>
     {

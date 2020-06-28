@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows;
 
-namespace FileTreeMap.SubdivisionStrategies.SquarifiedSubdivision
+namespace DemoControls.SubdivisionStrategies.SquarifiedSubdivision
 {
     public class SquarifiedSubdivisionStrategy : ISubdivisionStrategy
     {

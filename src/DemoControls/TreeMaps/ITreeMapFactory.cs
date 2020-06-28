@@ -1,8 +1,9 @@
-﻿using FileTreeMap.SubdivisionStrategies;
+﻿using DemoControls.SubdivisionStrategies;
+using DemoControls.Trees;
 using System.Threading;
 using System.Windows;
 
-namespace FileTreeMap
+namespace DemoControls.TreeMaps
 {
     public interface ITreeMapFactory<T> where T : ITreeItem<T>
     {

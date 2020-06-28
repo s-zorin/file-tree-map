@@ -1,4 +1,6 @@
-﻿using FileTreeMap.SubdivisionStrategies.SquarifiedSubdivision;
+﻿using DemoControls.SubdivisionStrategies.SquarifiedSubdivision;
+using DemoControls.TreeMaps;
+using DemoControls.Trees;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -9,7 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
-namespace FileTreeMap
+namespace DemoControls
 {
     public class FileTreeMapControl : Control
     {

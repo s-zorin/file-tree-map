@@ -1,4 +1,4 @@
-﻿namespace FileTreeMap.SubdivisionStrategies.SquarifiedSubdivision
+﻿namespace DemoControls.SubdivisionStrategies.SquarifiedSubdivision
 {
     internal struct AbstractRect
     {

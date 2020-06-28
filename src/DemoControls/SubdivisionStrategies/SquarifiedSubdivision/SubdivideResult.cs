@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows;
 
-namespace FileTreeMap.SubdivisionStrategies.SquarifiedSubdivision
+namespace DemoControls.SubdivisionStrategies.SquarifiedSubdivision
 {
     internal class SubdivideResult
     {

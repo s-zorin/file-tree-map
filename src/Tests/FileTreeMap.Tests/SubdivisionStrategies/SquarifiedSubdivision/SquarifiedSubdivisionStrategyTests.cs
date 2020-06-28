@@ -1,5 +1,5 @@
-using FileTreeMap.SubdivisionStrategies;
-using FileTreeMap.SubdivisionStrategies.SquarifiedSubdivision;
+using DemoControls.SubdivisionStrategies;
+using DemoControls.SubdivisionStrategies.SquarifiedSubdivision;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -8,7 +8,7 @@ using System.Windows;
 using System.Windows.Media;
 using Xunit;
 
-namespace FileTreeMap.Tests.SubdivisionStrategies.SquarifiedSubdivision
+namespace DemoControls.Tests.SubdivisionStrategies.SquarifiedSubdivision
 {
     public class SquarifiedSubdivisionStrategyTests
     {

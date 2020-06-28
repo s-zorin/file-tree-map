@@ -1,4 +1,4 @@
-﻿namespace FileTreeMap
+﻿namespace DemoControls.TreeMaps
 {
     public class TreeMapTitleDescription
     {

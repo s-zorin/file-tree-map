@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using DemoControls.Trees;
+using System.Collections.Generic;
 
-namespace FileTreeMap
+namespace DemoControls.TreeMaps
 {
     public interface ITreeMap<T> : IEnumerable<ITreeMapItem<T>> where T : ITreeItem<T>
     {

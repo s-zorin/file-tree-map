@@ -4,6 +4,10 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <AssemblyName>DemoControls.Tests</AssemblyName>
+
+    <RootNamespace>DemoControls.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\FileTreeMap\FileTreeMap.csproj" />
+    <ProjectReference Include="..\..\DemoControls\DemoControls.csproj" />
   </ItemGroup>
 
 </Project>

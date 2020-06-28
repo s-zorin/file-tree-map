@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Windows;
 
-namespace FileTreeMap.SubdivisionStrategies
+namespace DemoControls.SubdivisionStrategies
 {
     public interface ISubdivisionStrategy
     {

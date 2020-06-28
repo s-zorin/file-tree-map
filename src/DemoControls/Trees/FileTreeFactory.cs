@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Printing;
 using System.Threading;
 
-namespace FileTreeMap
+namespace DemoControls.Trees
 {
     public class FileTreeFactory
     {
