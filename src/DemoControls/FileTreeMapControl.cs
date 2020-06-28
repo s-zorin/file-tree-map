@@ -135,6 +135,7 @@ namespace DemoControls
                 return;
             }
 
+            watcher.IncludeSubdirectories = true;
             watcher.Path = DirectoryPath;
             watcher.NotifyFilter = NotifyFilters.LastWrite
                                  | NotifyFilters.FileName

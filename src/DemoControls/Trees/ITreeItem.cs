@@ -4,10 +4,10 @@ namespace DemoControls.Trees
 {
     public interface ITreeItem<T> where T : ITreeItem<T>
     {
-        string? Title { get; set; }
+        string Title { get; }
 
-        double Size { get; set; }
+        double Size { get; }
 
-        IList<T> Items { get; set; }
+        IList<T> Items { get; }
     }
 }

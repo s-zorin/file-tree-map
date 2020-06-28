@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
@@ -8,15 +7,8 @@ namespace DemoControls.Trees
 {
     public class FileTreeFactory
     {
-        public FileTreeFactory()
-        {
-            
-        }
-
         public FileTree CreateFileTree(DirectoryInfo root, CancellationToken cancellationToken = default)
         {
-            Debug.WriteLine($"Started creation of file tree. ({root.FullName})");
-
             var queue = new Queue<FileTreeItem>();
 
             if (!root.Exists)
@@ -24,56 +16,36 @@ namespace DemoControls.Trees
                 return FileTree.Empty;
             }
 
-            var item = CreateItem(null, root);
-            queue.Enqueue(item);
+            var rootItem = new FileTreeItem(null, root);
+            queue.Enqueue(rootItem);
 
-            var oldest = DateTime.MaxValue;
-            var newest = DateTime.MinValue;
+            var oldestFileTimestamp = DateTime.MaxValue;
+            var newestFileTimestamp = DateTime.MinValue;
 
             var options = new EnumerationOptions
             {
                 IgnoreInaccessible = true
             };
 
-            while (queue.TryDequeue(out var queuedItem))
+            while (queue.TryDequeue(out var parentItem))
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    Debug.WriteLine($"CANCELLATION REQEUSTED1 ({root.FullName})");
                     break;
                 }
 
-                if (queuedItem.Info is DirectoryInfo directoryInfo)
-                {
-                    oldest = oldest > queuedItem.Info.LastWriteTime ? queuedItem.Info.LastWriteTime : oldest;
-                    newest = newest < queuedItem.Info.LastWriteTime ? queuedItem.Info.LastWriteTime : newest;
+                oldestFileTimestamp = oldestFileTimestamp > parentItem.Info.LastWriteTime ? parentItem.Info.LastWriteTime : oldestFileTimestamp;
+                newestFileTimestamp = newestFileTimestamp < parentItem.Info.LastWriteTime ? parentItem.Info.LastWriteTime : newestFileTimestamp;
 
+                if (parentItem.Info is DirectoryInfo directoryInfo)
+                {
                     try
                     {
-                        foreach (var subInfo in directoryInfo.EnumerateFileSystemInfos("*", options))
+                        var items = ProcessFileInfos(parentItem, directoryInfo.EnumerateFileSystemInfos("*", options));
+                        
+                        foreach (var item in items)
                         {
-                            if (cancellationToken.IsCancellationRequested)
-                            {
-                                Debug.WriteLine($"CANCELLATION REQEUSTED2 ({root.FullName})");
-                                break;
-                            }
-
-                            var subItem = CreateItem(queuedItem, subInfo);
-                            queue.Enqueue(subItem);
-                            queuedItem.Items.Add(subItem);
-
-                            if (subInfo is FileInfo fileInfo)
-                            {
-                                subItem.Size = fileInfo.Length;
-
-                                var parent = subItem.Parent;
-                                while (parent != null)
-                                {
-                                    parent.Size += fileInfo.Length;
-                                    parent = parent.Parent;
-                                }
-
-                            }
+                            queue.Enqueue(item);
                         }
                     }
                     catch (IOException)
@@ -84,20 +56,17 @@ namespace DemoControls.Trees
                 }
             }
 
-            Debug.WriteLine("Exited loop.");
-
-            return new FileTree(item, oldest, newest);
+            return new FileTree(rootItem, oldestFileTimestamp, newestFileTimestamp);
         }
 
-        private FileTreeItem CreateItem(FileTreeItem? parent, FileSystemInfo info)
+        private IEnumerable<FileTreeItem> ProcessFileInfos(FileTreeItem parent, IEnumerable<FileSystemInfo> infos)
         {
-            return new FileTreeItem
+            foreach (var subInfo in infos)
             {
-                Parent = parent,
-                Title = info.Name, // TODO : Read from info?
-                Info = info,
-                Size = info is FileInfo f ? f.Length : 0
-            };
+                var subItem = new FileTreeItem(parent, subInfo);
+                parent.Items.Add(subItem);
+                yield return subItem;
+            }
         }
     }
 }
