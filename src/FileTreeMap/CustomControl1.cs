@@ -50,6 +50,22 @@ namespace FileTreeMap
             fullUpdateCancellationTokenSource = new CancellationTokenSource();
 
             SizeChanged += OnSizeChanged;
+            MouseDoubleClick += OnDoubleClick;
+        }
+
+        private void OnDoubleClick(object sender, MouseButtonEventArgs args)
+        {
+            if (fileTreeMap == null)
+            {
+                return;
+            }
+
+            if (fileTree == null)
+            {
+                return;
+            }
+
+            var hitResult = fileTreeMap.HitTest(args.GetPosition(this), fileTree);
         }
 
         private async void OnSizeChanged(object sender, SizeChangedEventArgs args)
@@ -160,7 +176,7 @@ namespace FileTreeMap
             var pixelsPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
             var hostRectangle = new Rect(0, 0, visualHost.ActualWidth, visualHost.ActualHeight);
 
-            var fileTreeMap = await Task.Run(() =>
+            fileTreeMap = await Task.Run(() =>
             {
                 return (FileTreeMap)fileTreeMapFactory.CreateTreeMap(
                     hostRectangle,
