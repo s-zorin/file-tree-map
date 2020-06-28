@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows;
 
@@ -62,7 +61,6 @@ namespace DemoControls.SubdivisionStrategies.SquarifiedSubdivision
                 var isProcessedAllRectangles = takeAmount > rectangleAreas.Count();
                 if (isProcessedAllRectangles)
                 {
-                    //var remainingRectangle = CutRowFromRectangle(rectangle, row);
                     return new SubdivideResult(Rect.Empty, row, true);
                 }
 
@@ -114,20 +112,20 @@ namespace DemoControls.SubdivisionStrategies.SquarifiedSubdivision
 
         private Rect CutBottomRowFromRectangle(Rect rectangle, Rect rowRectangle)
         {
-            var x = (rectangle.X);
-            var y = (rectangle.Y + rowRectangle.Height);
-            var width = (rectangle.Width);
-            var height = (rectangle.Height - rowRectangle.Height);
+            var x = rectangle.X;
+            var y = rectangle.Y + rowRectangle.Height;
+            var width = rectangle.Width;
+            var height = rectangle.Height - rowRectangle.Height;
 
             return new Rect(x, y, width, height);
         }
 
         private Rect CutLeftRowFromRectangle(Rect rectangle, Rect rowRectangle)
         {
-            var x = (rectangle.X + rowRectangle.Width);
-            var y = (rectangle.Y);
-            var width = (rectangle.Width - rowRectangle.Width);
-            var height = (rectangle.Height);
+            var x = rectangle.X + rowRectangle.Width;
+            var y = rectangle.Y;
+            var width = rectangle.Width - rowRectangle.Width;
+            var height = rectangle.Height;
 
             return new Rect(x, y, width, height);
         }
@@ -200,7 +198,7 @@ namespace DemoControls.SubdivisionStrategies.SquarifiedSubdivision
 
             double CalculateRectangleSideAlongRow(double rectangleArea)
             {
-                return (rectangleArea / totalArea * rowLength);
+                return rectangleArea / totalArea * rowLength;
             }
 
             static AbstractRect SolveRectangle(UnsolvedAbstractRect unsolvedRectangle)
