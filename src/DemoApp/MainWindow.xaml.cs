@@ -79,13 +79,23 @@ namespace DemoApp
 
             //var res = VisualTreeHelper.HitTest(VH, pos);
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(CC.DirectoryPath))
+            {
+                return;
+            }
+
+            CC.DirectoryPath = Directory.GetParent(CC.DirectoryPath)?.FullName;
+        }
     }
 
     //public class FileTreeMapGeometryFactory
     //{
     //    public Visual CreateGeometry(ITreeMap<FileTreeItem> map, double pixelsPerDip)
     //    {
-            
+
     //        var drawing = new DrawingVisual();
 
     //        var ctx = drawing.RenderOpen();

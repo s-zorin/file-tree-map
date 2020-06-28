@@ -33,6 +33,7 @@ namespace FileTreeMap
         VisualBrush? visualBrush;
         Rectangle? visualHost;
         UIElement? busyIndicator;
+        FileSystemWatcher? watcher;
 
         int busyCount = 0;
 
@@ -51,6 +52,32 @@ namespace FileTreeMap
 
             SizeChanged += OnSizeChanged;
             MouseDoubleClick += OnDoubleClick;
+            Unloaded += OnUnloaded;
+            Loaded += OnLoaded;
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            watcher = new FileSystemWatcher();
+            watcher.Changed += OnFileChanged;
+            watcher.Created += OnFileChanged;
+            watcher.Deleted += OnFileChanged;
+            watcher.Renamed += OnFileChanged;
+        }
+
+        private async void OnFileChanged(object sender, FileSystemEventArgs e)
+        {
+            // TODO : Можно пропатчить существующее дерево новыми изменениями и перерисовать экран/
+            // Жаль, что у меня нет на это времени, поэтому будет полный апдейт.
+            await Dispatcher.InvokeAsync(async () =>
+            {
+                await FullUpdateAsync();
+            });
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            watcher?.Dispose();
         }
 
         private void OnDoubleClick(object sender, MouseButtonEventArgs args)
@@ -66,6 +93,11 @@ namespace FileTreeMap
             }
 
             var hitResult = fileTreeMap.HitTest(args.GetPosition(this), fileTree);
+
+            if (hitResult?.TreeItem?.Info != null)
+            {
+                DirectoryPath = hitResult.TreeItem.Info.FullName;
+            }
         }
 
         private async void OnSizeChanged(object sender, SizeChangedEventArgs args)
@@ -73,21 +105,41 @@ namespace FileTreeMap
             await VisualUpdateAsync();
         }
 
-        public string DirectoryPath
+        public string? DirectoryPath
         {
-            get { return (string)GetValue(DirectoryPathProperty); }
+            get { return (string?)GetValue(DirectoryPathProperty); }
             set { SetValue(DirectoryPathProperty, value); }
         }
 
         public static readonly DependencyProperty DirectoryPathProperty =
-            DependencyProperty.Register("DirectoryPath", typeof(string), typeof(CustomControl1), new PropertyMetadata(string.Empty, OnDirectoryPathChanged));
+            DependencyProperty.Register("DirectoryPath", typeof(string), typeof(CustomControl1), new PropertyMetadata(null, OnDirectoryPathChanged));
 
         private static async void OnDirectoryPathChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs args)
         {
             if (dependencyObject is CustomControl1 control)
             {
                 await control.FullUpdateAsync();
+                control.SetupFileSystemWatcher();
             }
+        }
+
+        private void SetupFileSystemWatcher()
+        {
+            if (watcher == null)
+            {
+                return;
+            }
+
+            if (!Directory.Exists(DirectoryPath))
+            {
+                return;
+            }
+
+            watcher.Path = DirectoryPath;
+            watcher.NotifyFilter = NotifyFilters.LastWrite
+                                 | NotifyFilters.FileName
+                                 | NotifyFilters.DirectoryName;
+            watcher.EnableRaisingEvents = true;
         }
 
         public override async void OnApplyTemplate()
@@ -252,10 +304,8 @@ namespace FileTreeMap
                 return;
             }
 
-            if (DirectoryPath == string.Empty)
+            if (!Directory.Exists(DirectoryPath))
             {
-                fileTreeMap = new FileTreeMap();
-                await VisualUpdateAsync();
                 return;
             }
 

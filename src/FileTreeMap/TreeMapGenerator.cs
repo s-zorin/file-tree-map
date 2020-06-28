@@ -200,6 +200,8 @@ namespace FileTreeMap
                 var g  =  (byte)(60 + 180 * (i / (double)palette.Length));
                 palette[i] = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, g, 0));
             }
+
+            palette = palette.Reverse().ToArray();
         }
 
         public ITreeMap<FileTreeItem> CreateTreeMap(Rect rectangle, ITree<FileTreeItem> tree, ISubdivisionStrategy subdivisionStrategy, CancellationToken cancellationToken = default)
@@ -257,8 +259,13 @@ namespace FileTreeMap
 
         private Brush ChooseBrush(FileTreeItem treeItem)
         {
+            if (datesSpan.TotalDays < 1)
+            {
+                return palette[0];
+            }
+
             var grade = (double)((fileTree!.NewestItemTimestamp - treeItem.Info!.LastWriteTime).TotalDays) / (datesSpan.TotalDays);
-            var index = (int)(palette.Length * grade);
+            var index = (int)((palette.Length - 1) * grade);
             return palette[index];
         }
 

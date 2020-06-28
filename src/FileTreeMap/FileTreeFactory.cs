@@ -9,15 +9,17 @@ namespace FileTreeMap
 {
     public class FileTreeFactory
     {
-        private readonly Queue<FileTreeItem> queue;
-
         public FileTreeFactory()
         {
-            queue = new Queue<FileTreeItem>();
+            
         }
 
         public FileTree CreateFileTree(DirectoryInfo root, CancellationToken cancellationToken = default)
         {
+            Debug.WriteLine($"Started creation of file tree. ({root.FullName})");
+
+            var queue = new Queue<FileTreeItem>();
+
             if (!root.Exists)
             {
                 return new FileTree();
@@ -38,43 +40,52 @@ namespace FileTreeMap
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    Debug.WriteLine("CANCELLATION REQEUSTED1");
+                    Debug.WriteLine($"CANCELLATION REQEUSTED1 ({root.FullName})");
                     break;
                 }
 
                 if (queuedItem.Info is DirectoryInfo directoryInfo)
                 {
-                    foreach (var subInfo in directoryInfo.EnumerateFileSystemInfos("*", options))
+                    oldest = oldest > queuedItem.Info.LastWriteTime ? queuedItem.Info.LastWriteTime : oldest;
+                    newest = newest < queuedItem.Info.LastWriteTime ? queuedItem.Info.LastWriteTime : newest;
+
+                    try
                     {
-                        if (cancellationToken.IsCancellationRequested)
+                        foreach (var subInfo in directoryInfo.EnumerateFileSystemInfos("*", options))
                         {
-                            Debug.WriteLine("CANCELLATION REQEUSTED2");
-                            break;
-                        }
-
-                        var subItem = CreateItem(queuedItem, subInfo);
-                        queue.Enqueue(subItem);
-                        queuedItem.Items.Add(subItem);
-
-                        oldest = oldest > subInfo.LastWriteTime ? subInfo.LastWriteTime : oldest;
-                        newest = newest < subInfo.LastWriteTime ? subInfo.LastWriteTime : newest;
-
-                        if (subInfo is FileInfo fileInfo)
-                        {
-                            //queuedItem.Size += fileInfo.Length;
-                            subItem.Size = fileInfo.Length;
-
-                            var parent = subItem.Parent;
-                            while (parent != null)
+                            if (cancellationToken.IsCancellationRequested)
                             {
-                                parent.Size += fileInfo.Length;
-                                parent = parent.Parent;
+                                Debug.WriteLine($"CANCELLATION REQEUSTED2 ({root.FullName})");
+                                break;
                             }
 
+                            var subItem = CreateItem(queuedItem, subInfo);
+                            queue.Enqueue(subItem);
+                            queuedItem.Items.Add(subItem);
+
+                            if (subInfo is FileInfo fileInfo)
+                            {
+                                subItem.Size = fileInfo.Length;
+
+                                var parent = subItem.Parent;
+                                while (parent != null)
+                                {
+                                    parent.Size += fileInfo.Length;
+                                    parent = parent.Parent;
+                                }
+
+                            }
                         }
                     }
+                    catch (IOException)
+                    {
+                        // ignored
+                    }
+
                 }
             }
+
+            Debug.WriteLine("Exited loop.");
 
             return new FileTree
             {
