@@ -6,4 +6,8 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FileTreeMap\FileTreeMap.csproj" />
+  </ItemGroup>
+
 </Project>
