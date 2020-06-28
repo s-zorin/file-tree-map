@@ -21,7 +21,7 @@ namespace DemoControls.Trees
 
             if (!root.Exists)
             {
-                return new FileTree();
+                return FileTree.Empty;
             }
 
             var item = CreateItem(null, root);
@@ -86,12 +86,7 @@ namespace DemoControls.Trees
 
             Debug.WriteLine("Exited loop.");
 
-            return new FileTree
-            {
-                Root = item,
-                OldestItemTimestamp = oldest,
-                NewestItemTimestamp = newest
-            };
+            return new FileTree(item, oldest, newest);
         }
 
         private FileTreeItem CreateItem(FileTreeItem? parent, FileSystemInfo info)

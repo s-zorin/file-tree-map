@@ -64,7 +64,7 @@ namespace DemoControls.TreeMaps
             }
 
             fileTree = (FileTree)tree;
-            datesSpan = fileTree.NewestItemTimestamp - fileTree.OldestItemTimestamp;
+            datesSpan = fileTree.NewestFileTimestamp - fileTree.OldestFileTimestamp;
 
             var map = new FileTreeMap();
             var queue = new Queue<Pair>();
@@ -116,7 +116,7 @@ namespace DemoControls.TreeMaps
                 return palette[0];
             }
 
-            var grade = (double)((fileTree!.NewestItemTimestamp - treeItem.Info!.LastWriteTime).TotalDays) / (datesSpan.TotalDays);
+            var grade = (double)((fileTree!.NewestFileTimestamp - treeItem.Info!.LastWriteTime).TotalDays) / (datesSpan.TotalDays);
             var index = (int)((palette.Length - 1) * grade);
             return palette[index];
         }

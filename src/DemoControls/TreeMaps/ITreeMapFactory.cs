@@ -5,7 +5,7 @@ using System.Windows;
 
 namespace DemoControls.TreeMaps
 {
-    public interface ITreeMapFactory<T> where T : ITreeItem<T>
+    public interface ITreeMapFactory<T> where T : class, ITreeItem<T>
     {
         ITreeMap<T> CreateTreeMap(Rect rectangle, ITree<T> tree, ISubdivisionStrategy subdivisionStrategy, CancellationToken cancellationToken = default);
     }

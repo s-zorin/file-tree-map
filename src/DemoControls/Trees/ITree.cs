@@ -1,7 +1,7 @@
 ﻿namespace DemoControls.Trees
 {
-    public interface ITree<T> where T : ITreeItem<T>
+    public interface ITree<T> where T : class, ITreeItem<T>
     {
-        public T Root { get; set; }
+        public T? Root { get; }
     }
 }
