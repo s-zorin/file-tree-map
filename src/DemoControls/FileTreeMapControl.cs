@@ -15,34 +15,13 @@ using System.Windows.Shapes;
 
 namespace DemoControls
 {
-    public class Debouncer
-    {
-        private readonly TimeSpan delay;
-        private CancellationTokenSource? cts;
-
-        public Debouncer(TimeSpan delay)
-        {
-            this.delay = delay;
-        }
-
-        public void Enqueue(Action action)
-        {
-            cts?.Cancel();
-            cts?.Dispose();
-            cts = new CancellationTokenSource();
-
-            Task.Delay(delay, cts.Token)
-                .ContinueWith(task => action(), cts.Token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
-        }
-    }
-
     public class FileTreeMapControl : Control
     {
-        //private const string VISUAL_BRUSH_PART = "VisualBrush";
         private const string VISUAL_HOST_PART = "VisualHost";
         private const string BUSY_INDICATOR_PART = "BusyIndicator";
 
         private readonly Debouncer sizeDebouncer;
+        private readonly Debouncer fullDebouncer;
         private readonly FileTreeFactory fileTreeFactory;
         private readonly FileTreeMapFactory fileTreeMapFactory;
         private readonly SquarifiedSubdivisionStrategy subdivisionStrategy;
@@ -76,7 +55,8 @@ namespace DemoControls
 
         public FileTreeMapControl()
         {
-            sizeDebouncer = new Debouncer(TimeSpan.FromSeconds(1));
+            sizeDebouncer = new Debouncer(TimeSpan.FromSeconds(0.5));
+            fullDebouncer = new Debouncer(TimeSpan.FromSeconds(1));
             fileTreeFactory = new FileTreeFactory();
             fileTreeMapFactory = new FileTreeMapFactory();
             subdivisionStrategy = new SquarifiedSubdivisionStrategy();
@@ -103,14 +83,9 @@ namespace DemoControls
             watcher?.Dispose();
         }
 
-        private async void OnFileChanged(object sender, FileSystemEventArgs e)
+        private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            // Можно пропатчить существующее дерево новыми изменениями и перерисовать экран.
-            // Жаль, что у меня нет на это времени, поэтому будет полный апдейт.
-            await Dispatcher.InvokeAsync(async () =>
-            {
-                await FullUpdateAsync();
-            });
+            fullDebouncer.Enqueue(async () => await Dispatcher.InvokeAsync(FullUpdateAsync));
         }
 
         private void OnDoubleClick(object sender, MouseButtonEventArgs args)
@@ -181,7 +156,6 @@ namespace DemoControls
         {
             base.OnApplyTemplate();
 
-            //visualBrush = GetTemplateChild(VISUAL_BRUSH_PART) as VisualBrush;
             visualHost = GetTemplateChild(VISUAL_HOST_PART) as Rectangle;
             busyIndicator = GetTemplateChild(BUSY_INDICATOR_PART) as UIElement;
 
