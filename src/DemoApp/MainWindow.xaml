@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DemoApp"
         xmlns:democontrols="clr-namespace:DemoControls;assembly=DemoControls"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
@@ -18,9 +17,19 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <TextBox Margin="4" x:Name="PathTextBox" VerticalContentAlignment="Center" />
-        <Button Grid.Column="1" Padding="4" Content="Up" Margin="0,4,4,4" Click="Button_Click" />
+        <TextBox Margin="4"
+                 x:Name="PathTextBox"
+                 VerticalContentAlignment="Center" />
+        
+        <Button Grid.Column="1"
+                Padding="4"
+                Content="Up"
+                Margin="0,4,4,4"
+                Click="Button_Click" />
 
-        <democontrols:FileTreeMapControl Grid.Row="1" Grid.ColumnSpan="2" x:Name="CC" DirectoryPath="{Binding Text, ElementName=PathTextBox, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+        <democontrols:FileTreeMapControl x:Name="FileTreeMapControl"
+                                         Grid.Row="1"
+                                         Grid.ColumnSpan="2"
+                                         DirectoryPath="{Binding Text, ElementName=PathTextBox, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
     </Grid>
 </Window>

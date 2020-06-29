@@ -162,7 +162,7 @@ namespace DemoControls.TreeMaps
 
             while (subrectangleAreas.Min(sa => sa.Area) < MIN_AREA && subrectangleAreas.Count > 1)
             {
-                var last = subrectangleAreas[subrectangleAreas.Count - 1];
+                var last = subrectangleAreas.Last();
                 subrectangleAreas.Remove(last);
                 var areaToRedistribute = last.Area / subrectangleAreas.Count;
                 foreach (var sub in subrectangleAreas)

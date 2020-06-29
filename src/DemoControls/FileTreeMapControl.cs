@@ -267,10 +267,12 @@ namespace DemoControls
                         new Typeface("Arial"),
                         12,
                         Brushes.Black,
-                        pixelsPerDip);
+                        pixelsPerDip)
+                    {
+                        MaxTextWidth = item.RectangleDescription.Rectangle.Width,
+                        MaxLineCount = 1
+                    };
 
-                    formattedText.MaxTextWidth = item.RectangleDescription.Rectangle.Width;
-                    formattedText.MaxLineCount = 1;
                     drawingContext.DrawText(formattedText, item.TitleDescription.Position);
                 }                
             }

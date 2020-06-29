@@ -22,22 +22,17 @@ namespace DemoControls.TreeMaps
                 return null;
             }
 
-            //var queue = new Queue<FileTreeItem>();
-            //queue.Enqueue(tree.Root);
-            FileTreeMapItem? hit = null;
             FileTreeMapItem? previousHit = null;
 
-            //while (queue.TryDequeue(out var treeItem))
-            //{
 
-            //}
-
-            var testList = new List<FileTreeItem>();
-            testList.Add(tree.Root);
+            var testList = new List<FileTreeItem>
+            {
+                tree.Root
+            };
 
             while (testList.Count > 0)
             {
-                hit = null;
+                FileTreeMapItem? hit = null;
 
                 foreach (var treeItem in testList)
                 {
