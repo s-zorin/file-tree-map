@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
@@ -66,26 +67,28 @@ namespace DemoControls.TreeMaps
             directoryAge = fileTree.NewestFileTimestamp - fileTree.OldestFileTimestamp;
             newestFileTimestamp = fileTree.NewestFileTimestamp;
 
+            var autoResetEvent = new AutoResetEvent(false);
+            var tasks = new List<Task<IEnumerable<FileTreeItemRectangle>>>();
             var map = new FileTreeMap();
             var queue = new Queue<FileTreeItemRectangle>();
             queue.Enqueue(new FileTreeItemRectangle(tree.Root, rectangle));
 
-            while (queue.TryDequeue(out var itemRectangle))
+            while (queue.Count > 0)
             {
-                if (cancellationToken.IsCancellationRequested)
+                while (queue.TryDequeue(out var itemRectangle))
                 {
-                    break;
+                    map.Add(CreateMapItem(itemRectangle));
+                    tasks.Add(Task.Run(() => { return Subdivide(itemRectangle, subdivisionStrategy); }));
                 }
 
-                var mapItem = CreateMapItem(itemRectangle);
-                map.Add(mapItem);
-
-                var pairs = Subdivide(itemRectangle, subdivisionStrategy);
-
-                foreach (var subPair in pairs)
+                Task.WhenAll(tasks).ContinueWith(task =>
                 {
-                    queue.Enqueue(subPair);
-                }
+                    task.Result.ToList().ForEach(group => group.ToList().ForEach(r => queue.Enqueue(r)));
+                    autoResetEvent.Set();
+                });
+
+                tasks.Clear();
+                autoResetEvent.WaitOne();
             }
 
             return map;

@@ -32,7 +32,9 @@ namespace DemoControls.TreeMaps
             for (int i = 0; i < length; i++)
             {
                 var g = (byte)(255 - 180d * i / length);
-                yield return new SolidColorBrush(Color.FromRgb(0, g, 0));
+                var brush = new SolidColorBrush(Color.FromRgb(0, g, 0));
+                brush.Freeze();
+                yield return brush;
             }
         }
     }

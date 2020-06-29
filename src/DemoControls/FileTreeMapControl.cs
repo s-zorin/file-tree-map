@@ -1,6 +1,7 @@
 ﻿using DemoControls.SubdivisionStrategies.SquarifiedSubdivision;
 using DemoControls.TreeMaps;
 using DemoControls.Trees;
+using System;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -9,16 +10,39 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
 namespace DemoControls
 {
+    public class Debouncer
+    {
+        private readonly TimeSpan delay;
+        private CancellationTokenSource? cts;
+
+        public Debouncer(TimeSpan delay)
+        {
+            this.delay = delay;
+        }
+
+        public void Enqueue(Action action)
+        {
+            cts?.Cancel();
+            cts?.Dispose();
+            cts = new CancellationTokenSource();
+
+            Task.Delay(delay, cts.Token)
+                .ContinueWith(task => action(), cts.Token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
+        }
+    }
+
     public class FileTreeMapControl : Control
     {
-        private const string VISUAL_BRUSH_PART = "VisualBrush";
+        //private const string VISUAL_BRUSH_PART = "VisualBrush";
         private const string VISUAL_HOST_PART = "VisualHost";
         private const string BUSY_INDICATOR_PART = "BusyIndicator";
 
+        private readonly Debouncer sizeDebouncer;
         private readonly FileTreeFactory fileTreeFactory;
         private readonly FileTreeMapFactory fileTreeMapFactory;
         private readonly SquarifiedSubdivisionStrategy subdivisionStrategy;
@@ -27,7 +51,6 @@ namespace DemoControls
 
         private FileTree? fileTree;
         private FileTreeMap? fileTreeMap;
-        private VisualBrush? visualBrush;
         private Rectangle? visualHost;
         private UIElement? busyIndicator;
         private FileSystemWatcher? watcher;
@@ -53,6 +76,7 @@ namespace DemoControls
 
         public FileTreeMapControl()
         {
+            sizeDebouncer = new Debouncer(TimeSpan.FromSeconds(1));
             fileTreeFactory = new FileTreeFactory();
             fileTreeMapFactory = new FileTreeMapFactory();
             subdivisionStrategy = new SquarifiedSubdivisionStrategy();
@@ -109,9 +133,9 @@ namespace DemoControls
             }
         }
 
-        private async void OnSizeChanged(object sender, SizeChangedEventArgs args)
+        private void OnSizeChanged(object sender, SizeChangedEventArgs args)
         {
-            await VisualUpdateAsync();
+            sizeDebouncer.Enqueue(async () => await Dispatcher.InvokeAsync(VisualUpdateAsync));
         }
 
         private static async void OnDirectoryPathChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs args)
@@ -157,7 +181,7 @@ namespace DemoControls
         {
             base.OnApplyTemplate();
 
-            visualBrush = GetTemplateChild(VISUAL_BRUSH_PART) as VisualBrush;
+            //visualBrush = GetTemplateChild(VISUAL_BRUSH_PART) as VisualBrush;
             visualHost = GetTemplateChild(VISUAL_HOST_PART) as Rectangle;
             busyIndicator = GetTemplateChild(BUSY_INDICATOR_PART) as UIElement;
 
@@ -213,33 +237,21 @@ namespace DemoControls
             }
         }
 
-        private async Task VisualUpdateAsync(CancellationToken cancellationToken)
+        private async Task<FileTreeMap?> CreateFileTreeMapAsync(CancellationToken cancellationToken)
         {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return;
-            }
-
             if (visualHost == null)
             {
-                return;
-            }
-
-            if (visualBrush == null)
-            {
-                return;
+                return null;
             }
 
             if (fileTree == null)
             {
-                return;
+                return null;
             }
 
-            var drawingVisual = new DrawingVisual();
-            var pixelsPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
             var hostRectangle = new Rect(0, 0, visualHost.ActualWidth, visualHost.ActualHeight);
 
-            fileTreeMap = await Task.Run(() =>
+            return await Task.Run(() =>
             {
                 return (FileTreeMap)fileTreeMapFactory.CreateTreeMap(
                     hostRectangle,
@@ -247,18 +259,62 @@ namespace DemoControls
                     subdivisionStrategy,
                     cancellationToken);
             }, cancellationToken);
+        }
+
+        private async Task<ImageBrush?> CreateImageBrush(FileTreeMap fileTreeMap, CancellationToken cancellationToken)
+        {
+            if (visualHost == null)
+            {
+                return null;
+            }
+
+            if (fileTreeMap == null)
+            {
+                return null;
+            }
+
+            var bitmapWidth = (int)visualHost.ActualWidth;
+            var bitmapHeight = (int)visualHost.ActualHeight;
+            var pixelsPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
+
+            return await Task.Run(() =>
+            {
+                var drawingVisual = new DrawingVisual();
+                using (var drawingContext = drawingVisual.RenderOpen())
+                {
+                    DrawFileTreeMap(drawingContext, fileTreeMap, pixelsPerDip);
+                }
+
+                var bitmap = new RenderTargetBitmap(bitmapWidth, bitmapHeight, 96 * pixelsPerDip, 96 * pixelsPerDip, PixelFormats.Pbgra32);
+                bitmap.Render(drawingVisual);
+                bitmap.Freeze();
+
+                var brush = new ImageBrush(bitmap);
+                brush.Freeze();
+                return brush;
+            }, cancellationToken);
+        }
+
+        private async Task VisualUpdateAsync(CancellationToken cancellationToken)
+        {
+            fileTreeMap = await CreateFileTreeMapAsync(cancellationToken);
+
+            if (fileTreeMap == null)
+            {
+                return;
+            }
 
             if (cancellationToken.IsCancellationRequested)
             {
                 return;
             }
 
-            using (var drawingContext = drawingVisual.RenderOpen())
-            {
-                DrawFileTreeMap(drawingContext, fileTreeMap, pixelsPerDip);
-            }
+            var imageBrush = await CreateImageBrush(fileTreeMap, cancellationToken);
 
-            visualBrush.Visual = drawingVisual;
+            if (visualHost != null)
+            {
+                visualHost.Fill = imageBrush;
+            }
         }
 
         private void DrawFileTreeMap(DrawingContext drawingContext, FileTreeMap fileTreeMap, double pixelsPerDip)

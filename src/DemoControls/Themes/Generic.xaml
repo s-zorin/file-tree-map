@@ -8,11 +8,11 @@
                 <ControlTemplate TargetType="{x:Type local:FileTreeMapControl}">
                     <Grid>
                         <Rectangle x:Name="VisualHost">
-                            <Rectangle.Fill>
+                            <!--<Rectangle.Fill>
                                 <VisualBrush x:Name="VisualBrush">
 
                                 </VisualBrush>
-                            </Rectangle.Fill>
+                            </Rectangle.Fill>-->
                         </Rectangle>
 
                         <Border x:Name="BusyIndicator" Visibility="Hidden">
