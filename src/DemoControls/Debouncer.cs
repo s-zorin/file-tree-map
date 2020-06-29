@@ -29,7 +29,7 @@ namespace DemoControls
                     task => action(),
                     cts.Token,
                     TaskContinuationOptions.OnlyOnRanToCompletion,
-                    TaskScheduler.FromCurrentSynchronizationContext());
+                    TaskScheduler.Current);
 
             autoResetEvent.Set();
         }
