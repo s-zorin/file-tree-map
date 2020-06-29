@@ -38,7 +38,7 @@ namespace DemoControls
             nameof(DirectoryPath),
             typeof(string),
             typeof(FileTreeMapControl),
-            new PropertyMetadata(null, OnDirectoryPathChanged));
+            new PropertyMetadata(null, OnDirectoryPathChanged, CoerceDirectoryPath));
 
         public string? DirectoryPath
         {
@@ -121,6 +121,16 @@ namespace DemoControls
                 await control.FullUpdateAsync();
                 control.SetupFileSystemWatcher();
             }
+        }
+
+        private static object CoerceDirectoryPath(DependencyObject dependencyObject, object baseValue)
+        {
+            if (baseValue is string s)
+            {
+                return s.Trim();
+            }
+
+            return baseValue;
         }
 
         private void SetupFileSystemWatcher()
