@@ -1,6 +1,7 @@
 ﻿using DemoControls.Trees;
 using System.Collections;
 using System.Collections.Generic;
+using System.Windows;
 
 namespace DemoControls.TreeMaps
 {
@@ -15,53 +16,43 @@ namespace DemoControls.TreeMaps
             dictionary.Add(item.TreeItem, item);
         }
 
-        public ITreeMapItem<FileTreeItem>? HitTest(System.Windows.Point point, ITree<FileTreeItem> tree)
+        public ITreeMapItem<FileTreeItem>? HitTest(Point point, ITree<FileTreeItem> tree)
         {
             if (tree.Root == null)
             {
                 return null;
             }
 
-            FileTreeMapItem? previousHit = null;
-
-
-            var testList = new List<FileTreeItem>
+            FileTreeItem? previousHit = null;
+            var treeItemsToTest = new List<FileTreeItem>
             {
                 tree.Root
             };
 
-            while (testList.Count > 0)
+            while (treeItemsToTest.Count > 0)
             {
-                FileTreeMapItem? hit = null;
-
-                foreach (var treeItem in testList)
-                {
-                    if (dictionary.TryGetValue(treeItem, out var mapItem))
-                    {
-                        if (mapItem.RectangleDescription.Rectangle.Contains(point))
-                        {
-                            hit = mapItem;
-                            break;
-                        }
-                    }
-                }
-
+                var hit = HitTestTreeItems(treeItemsToTest, point);
                 if (hit == null)
                 {
                     break;
                 }
 
                 previousHit = hit;
-
-                testList.Clear();
-
-                if (hit != null)
-                {
-                    testList.AddRange(hit.TreeItem.Items);
-                }
+                treeItemsToTest.Clear();
+                treeItemsToTest.AddRange(hit.Items);
             }
 
-            return previousHit;
+            if (previousHit == null)
+            {
+                return null;
+            }
+
+            if (dictionary.TryGetValue(previousHit, out var result))
+            {
+                return result;
+            }
+
+            return null;
         }
 
         public IEnumerator<ITreeMapItem<FileTreeItem>> GetEnumerator()
@@ -72,6 +63,29 @@ namespace DemoControls.TreeMaps
         IEnumerator IEnumerable.GetEnumerator()
         {
             return items.GetEnumerator();
+        }
+
+        private bool HitTestTreeItem(FileTreeItem treeItem, Point point)
+        {
+            if (dictionary.TryGetValue(treeItem, out var mapItem))
+            {
+                return mapItem.RectangleDescription.Rectangle.Contains(point);
+            }
+
+            return false;
+        }
+
+        private FileTreeItem? HitTestTreeItems(IEnumerable<FileTreeItem> treeItems, Point point)
+        {
+            foreach (var treeItem in treeItems)
+            {
+                if (HitTestTreeItem(treeItem, point))
+                {
+                    return treeItem;
+                }
+            }
+
+            return null;
         }
     }
 }
