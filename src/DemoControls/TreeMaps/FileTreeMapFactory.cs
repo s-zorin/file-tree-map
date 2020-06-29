@@ -11,12 +11,12 @@ namespace DemoControls.TreeMaps
 {
     public class FileTreeMapFactory : ITreeMapFactory<FileTreeItem>
     {
-        private FileTree? fileTree;
-        private TimeSpan datesSpan;
+        private TimeSpan directoryAge;
+        private DateTime newestFileTimestamp;
 
-        private readonly Brush[] palette;
+        private readonly FileTreeMapPalette palette;
 
-        private struct Pair
+        private class FileTreeItemRectangle
         {
             public FileTreeItem TreeItem { get; set; }
 
@@ -36,24 +36,23 @@ namespace DemoControls.TreeMaps
                 return new Rect(x, y, width, height);
             }
 
-            public Pair(FileTreeItem treeItem, Rect associatedRectangle)
+            public FileTreeItemRectangle(FileTreeItem treeItem, Rect associatedRectangle)
             {
                 TreeItem = treeItem;
                 AssociatedRectangle = associatedRectangle;
             }
         }
 
+        private class FileTreeItemArea
+        {
+            public FileTreeItem? Item { get; set; }
+
+            public double Area { get; set; }
+        }
+
         public FileTreeMapFactory()
         {
-            palette = new Brush[50];
-
-            for (int i = 0; i < palette.Length; i++)
-            {
-                var g  =  (byte)(60 + 180 * (i / (double)palette.Length));
-                palette[i] = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, g, 0));
-            }
-
-            palette = palette.Reverse().ToArray();
+            palette = new FileTreeMapPalette(50);
         }
 
         public ITreeMap<FileTreeItem> CreateTreeMap(Rect rectangle, ITree<FileTreeItem> tree, ISubdivisionStrategy subdivisionStrategy, CancellationToken cancellationToken = default)
@@ -63,24 +62,25 @@ namespace DemoControls.TreeMaps
                 return new FileTreeMap();
             }
 
-            fileTree = (FileTree)tree;
-            datesSpan = fileTree.NewestFileTimestamp - fileTree.OldestFileTimestamp;
+            var fileTree = (FileTree)tree;
+            directoryAge = fileTree.NewestFileTimestamp - fileTree.OldestFileTimestamp;
+            newestFileTimestamp = fileTree.NewestFileTimestamp;
 
             var map = new FileTreeMap();
-            var queue = new Queue<Pair>();
-            queue.Enqueue(new Pair(tree.Root, rectangle));
+            var queue = new Queue<FileTreeItemRectangle>();
+            queue.Enqueue(new FileTreeItemRectangle(tree.Root, rectangle));
 
-            while (queue.TryDequeue(out var pair))
+            while (queue.TryDequeue(out var itemRectangle))
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
                     break;
                 }
 
-                var mapItem = CreateMapItem(pair);
+                var mapItem = CreateMapItem(itemRectangle);
                 map.Add(mapItem);
 
-                var pairs = Subdivide(pair, subdivisionStrategy);
+                var pairs = Subdivide(itemRectangle, subdivisionStrategy);
 
                 foreach (var subPair in pairs)
                 {
@@ -91,7 +91,7 @@ namespace DemoControls.TreeMaps
             return map;
         }
 
-        private FileTreeMapItem CreateMapItem(Pair pair)
+        private FileTreeMapItem CreateMapItem(FileTreeItemRectangle pair)
         {
             var title = new TreeMapTitleDescription
             {
@@ -111,55 +111,42 @@ namespace DemoControls.TreeMaps
 
         private Brush ChooseBrush(FileTreeItem treeItem)
         {
-            if (datesSpan.TotalDays < 1)
+            if (directoryAge.TotalDays < 1)
             {
                 return palette[0];
             }
 
-            var grade = (double)((fileTree!.NewestFileTimestamp - treeItem.Info!.LastWriteTime).TotalDays) / (datesSpan.TotalDays);
+            var age = newestFileTimestamp - treeItem.Info.LastWriteTime;
+            var grade = age.TotalDays / directoryAge.TotalDays;
             var index = (int)((palette.Length - 1) * grade);
             return palette[index];
         }
 
-        private class FileTreeItemArea
+        private IEnumerable<FileTreeItemRectangle> Subdivide(FileTreeItemRectangle itemRectangle, ISubdivisionStrategy strategy)
         {
-            public FileTreeItem? Item { get; set; }
-
-            public double Area { get; set; }
-        }
-
-        private IEnumerable<Pair> Subdivide(Pair pair, ISubdivisionStrategy strategy)
-        {
-            // Нужно удалить Н-ное количество подквадратов с минимальной площадью, так чтобы все оставшиеся квадраты были площадью как минимум 32 на 32.
-
             const int MIN_AREA = 64 * 64;
 
-            if (pair.RectangleToSubdivide.Width < 4 ||
-                pair.RectangleToSubdivide.Height < 4)
+            if (itemRectangle.RectangleToSubdivide.Width < 4 ||
+                itemRectangle.RectangleToSubdivide.Height < 4)
             {
-                return Enumerable.Empty<Pair>();
+                return Enumerable.Empty<FileTreeItemRectangle>();
             }
 
-            var rectangleArea = pair.RectangleToSubdivide.Width * pair.RectangleToSubdivide.Height;
+            var rectangleArea = itemRectangle.RectangleToSubdivide.Width * itemRectangle.RectangleToSubdivide.Height;
 
-            var totalSize = pair.TreeItem.Items.Sum(i => i.Size);
+            var totalSize = itemRectangle.TreeItem.Items.Sum(i => i.Size);
             var conversionRatio = rectangleArea / totalSize;
 
-            var itemsWithSize = pair.TreeItem.Items.Where(i => i.Size > 0).OrderByDescending(i => i.Size).ToList();
-
-
+            var itemsWithSize = itemRectangle.TreeItem.Items.Where(i => i.Size > 0).OrderByDescending(i => i.Size).ToList();
 
             if (!itemsWithSize.Any())
             {
-                return Enumerable.Empty<Pair>();
+                return Enumerable.Empty<FileTreeItemRectangle>();
             }
 
-
-
-
-            // Cleanup small rects
             var subrectangleAreas = itemsWithSize.Select(i => new FileTreeItemArea { Item = i, Area = i.Size * conversionRatio }).ToList();
 
+            // Удаляем самые маленькие прямоугольники и перераспределяем их площадь по остальным прямоугольникам.
             while (subrectangleAreas.Min(sa => sa.Area) < MIN_AREA && subrectangleAreas.Count > 1)
             {
                 var last = subrectangleAreas.Last();
@@ -171,13 +158,10 @@ namespace DemoControls.TreeMaps
                 }
             }
 
-
-
-
-            var rectangles = strategy.Subdivide(pair.RectangleToSubdivide, subrectangleAreas.Select(a => a.Area));
+            var rectangles = strategy.Subdivide(itemRectangle.RectangleToSubdivide, subrectangleAreas.Select(a => a.Area));
             rectangles = DownsizeRectangles(rectangles);
-            var pairs = subrectangleAreas.Zip(rectangles, (item, rectangle) => new Pair(item.Item, rectangle));
-            return pairs/*.Where(p => p.AssociatedRectangle.Width >= 16 && p.AssociatedRectangle.Height >= 16)*/;
+            var pairs = subrectangleAreas.Zip(rectangles, (item, rectangle) => new FileTreeItemRectangle(item.Item!, rectangle));
+            return pairs;
         }
 
         private IEnumerable<Rect> DownsizeRectangles(IEnumerable<Rect> rectangles)
@@ -187,7 +171,5 @@ namespace DemoControls.TreeMaps
                 yield return new Rect(r.X + 2, r.Y + 2, Math.Max(r.Width - 4, 0), Math.Max(r.Height - 4, 0));
             }
         }
-
-        
     }
 }
