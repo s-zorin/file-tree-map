@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:democontrols="clr-namespace:DemoControls;assembly=DemoControls"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="File TreeMap" Height="450" Width="800">
     <Grid x:Name="G">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -13,23 +13,41 @@
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <TextBox Margin="4"
-                 x:Name="PathTextBox"
-                 VerticalContentAlignment="Center" />
+        <StackPanel Orientation="Horizontal">
+            <Button Content="Browse..." Click="Browse_Click" Margin="4,4,0,4" Padding="4" />
+        </StackPanel>
         
-        <Button Grid.Column="1"
+
+        <TextBox Margin="4"
+                 Grid.Column="1"
+                 x:Name="PathTextBox"
+                 VerticalContentAlignment="Center"
+                 GotFocus="PathTextBox_Focus" 
+                 LostFocus="PathTextBox_Focus"
+                 TextChanged="PathTextBox_TextChanged"/>
+
+        <TextBlock Text="Click Browse... or enter directory path here"
+                   x:Name="PlaceholderText"
+                   Foreground="Gray"
+                   Grid.Column="1"
+                   VerticalAlignment="Center"
+                   Margin="8"
+                   IsHitTestVisible="False" />
+
+        <Button Grid.Column="2"
                 Padding="4"
-                Content="Up"
+                Content="Go To Parent Directory"
                 Margin="0,4,4,4"
                 Click="Button_Click" />
 
         <democontrols:FileTreeMapControl x:Name="FileTreeMapControl"
                                          Grid.Row="1"
-                                         Grid.ColumnSpan="2"
+                                         Grid.ColumnSpan="3"
                                          DirectoryPath="{Binding Text, ElementName=PathTextBox, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
     </Grid>
 </Window>
